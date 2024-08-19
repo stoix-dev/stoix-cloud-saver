@@ -32,9 +32,18 @@ pulumi new typescript
 doctl version
 ```
 
-## Authenticate doctl with your DigitalOcean account
+## STEP 4: Generate doctl token on the API section on Digital Ocean
+![alt text](image.png)
+
+## STEP 5: Authenticate doctl with your Digital Ocean token just generated
 
 ```bash
 doctl auth init
+```
+
+## Step 6: Go to the project infra repository and run:
+
+```bash
+pulumi up
 ```
 
