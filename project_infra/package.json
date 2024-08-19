@@ -1,0 +1,13 @@
+{
+    "name": "project_infra",
+    "main": "index.ts",
+    "devDependencies": {
+        "@types/node": "^18",
+        "typescript": "^5.0.0"
+    },
+    "dependencies": {
+        "@pulumi/digitalocean": "^4.31.0",
+        "@pulumi/kubernetes": "^4.17.0",
+        "@pulumi/pulumi": "^3.113.0"
+    }
+}

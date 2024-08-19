@@ -1,0 +1,6 @@
+config:
+  project_infra:clusterName: project-cluster
+  project_infra:databaseName: project-database
+  project_infra:domainName: example.com
+  project_infra:nodePool: cluster-pool
+  project_infra:redisName: project-redis
