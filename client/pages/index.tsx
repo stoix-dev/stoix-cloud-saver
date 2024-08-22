@@ -17,7 +17,6 @@ export default function IndexPage() {
       });
   }, []);
 
-  
   const saveNotification = async () => {
     await fetch("/api/notifications", {
       method: "POST",
