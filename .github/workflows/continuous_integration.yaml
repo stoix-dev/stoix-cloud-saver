@@ -30,7 +30,3 @@ jobs:
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
         run: |
           ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
-
-on:
-  merge_request:
-    types: []
