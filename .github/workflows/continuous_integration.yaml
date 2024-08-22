@@ -7,13 +7,13 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-  - uses: actions/checkout@v3
-  - name: Using Node.js
-    uses: actions/setup-node@v2
-    with:
-      node-version: '20.x'
-  - name: run install, build
-    run: |
-      cd client
-      npm install
-      npm run build
+      - uses: actions/checkout@v3
+      - name: Using Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+      - name: run install, build
+        run: |
+          cd client
+          npm install
+          npm run build 
