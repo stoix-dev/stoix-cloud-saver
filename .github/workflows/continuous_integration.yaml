@@ -1,19 +1,32 @@
-name: Continuos Integration
+name: Continuous Integration
 
 on: pull_request
 
 jobs:
-  continuos-integration:
+  continuous-integration:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v3
-      - name: Using Node.js
+
+      - name: Setup Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: 20
-      - name: run install, build
+          node-version: '20'
+
+      - name: Install and build project
         run: |
           cd client
           npm install
-          npm run build 
+          npm run build
+
+      - name: Install doctl
+        run: |
+          curl -sL https://github.com/digitalocean/doctl/releases/download/v1.61.0/doctl-1.61.0-linux-amd64.tar.gz | tar -xzv
+          sudo mv doctl /usr/local/bin
+
+      - name: Authenticate with DigitalOcean
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+        run: |
+          cd project_infra/scripts
+          ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
