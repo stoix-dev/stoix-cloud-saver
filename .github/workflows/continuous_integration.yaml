@@ -28,5 +28,6 @@ jobs:
         env:
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
         run: |
+          chmod +x ./scripts/*.sh
           cd project_infra/scripts
           ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
