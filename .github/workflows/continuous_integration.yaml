@@ -20,6 +20,8 @@ jobs:
           npm run build
 
       - name: Install setup
+        env:
+          PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
         run: |
           cd project_infra
           chmod +x ./scripts/*.sh
