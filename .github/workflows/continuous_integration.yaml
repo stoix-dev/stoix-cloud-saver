@@ -82,7 +82,8 @@ jobs:
           cd scripts
           doctl auth list
           docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
-    -name: Deploy to DigitalOcean Kubernetes
+
+      - name: Deploy to DigitalOcean Kubernetes
         env:
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
           DIGITALOCEAN_USERNAME: ${{ secrets.DIGITALOCEAN_USERNAME }}
