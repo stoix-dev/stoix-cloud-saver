@@ -74,9 +74,10 @@ jobs:
       - name: Push Docker Image to DigitalOcean Container Registry
         env:
           DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
         run: |
           cd project_infra
           chmod +x ./scripts/*.sh
           cd scripts
-          ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
+          doctl auth init --access-token $DIGITALOCEAN_TOKEN
           docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
