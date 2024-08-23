@@ -79,6 +79,6 @@ jobs:
           cd project_infra
           chmod +x ./scripts/*.sh
           cd scripts
-          echo ${{ secrets.DIGITALOCEAN_TOKEN }} | docker login registry.digitalocean.com -u ${{ secrets.DIGITALOCEAN_USERNAME }} --password-stdin
+          docker login registry.digitalocean.com -u "${{ secrets.DIGITALOCEAN_USERNAME }}" -p "${{ secrets.DIGITALOCEAN_API_TOKEN }}"
           doctl auth list
           docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
