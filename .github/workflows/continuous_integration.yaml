@@ -63,5 +63,7 @@ jobs:
       - name: Build Docker Image
         run: |
           docker-compose build web-next-app
+      - name: Tag Docker Image to DigitalOcean Container Registry
+        run: |
+          docker tag stoix-cloud-saver-web-next-app:latest registry.digitalocean.com/${{secrets.DOCKER_REGISTRY}}/stoix-cloud-saver-web-next-app
           docker images
-      
