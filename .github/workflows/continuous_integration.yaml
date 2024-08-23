@@ -49,8 +49,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
-
-      - name: Additional task after merge to main
+      - name: Authenticate with Pulumi and DigitalOcean
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
@@ -61,3 +60,9 @@ jobs:
           cd scripts
           ./setup.sh
           ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
+      - name: Build Docker Image
+        run: |
+          cd project_infra
+          chmod +x ./scripts/*.sh
+          cd scripts
+          ./deploy.sh $DIGITALOCEAN_TOKEN

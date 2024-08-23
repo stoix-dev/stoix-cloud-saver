@@ -1,14 +1,8 @@
-version: '3.8'
-
+version: '3'
 services:
-  postgres:
-    image: postgres:16
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
-    volumes:
-      - ./data:/var/lib/postgresql/database
+  web-next-app:
+    build: 
+      context: "./client"  
+      dockerfile: "./.docker/prod/Dockerfile"
     ports:
-      - "5432:5432"
+      - "80:80"
