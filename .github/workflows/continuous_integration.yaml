@@ -80,4 +80,5 @@ jobs:
           chmod +x ./scripts/*.sh
           cd scripts
           doctl auth init --access-token $DIGITALOCEAN_TOKEN
+          doctl auth list
           docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
