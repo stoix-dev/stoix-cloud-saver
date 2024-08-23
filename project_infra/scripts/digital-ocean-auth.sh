@@ -10,5 +10,4 @@ docker login -u $DIGITALOCEAN_USERNAME -p $DIGITALOCEAN_TOKEN registry.digitaloc
 
 # Validate the token and set up context
 echo "Token validation and context setup complete."
-sudo docker push registry.digitalocean.com/$DOCKER_REGISTRY/stoix-cloud-saver-web-next-app
 
