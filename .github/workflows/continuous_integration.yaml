@@ -81,9 +81,7 @@ jobs:
           chmod +x ./scripts/*.sh
           cd scripts
           ./setup.sh
-          ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN $DIGITALOCEAN_USERNAME
-          doctl auth list
-          docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
+          ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN $DIGITALOCEAN_USERNAME DOCKER_REGISTRY
 
       - name: Deploy to DigitalOcean Kubernetes
         env:
