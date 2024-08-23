@@ -80,6 +80,15 @@ jobs:
           cd project_infra
           chmod +x ./scripts/*.sh
           cd scripts
-          echo "${{ secrets.DIGITALOCEAN_TOKEN }}" | docker login registry.digitalocean.com -u "${{ secrets.DIGITALOCEAN_USERNAME }}" --password-stdin
           doctl auth list
           docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
+    -name: Deploy to DigitalOcean Kubernetes
+        env:
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+          DIGITALOCEAN_USERNAME: ${{ secrets.DIGITALOCEAN_USERNAME }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
+        run: |
+          cd project_infra
+          chmod +x ./scripts/*.sh
+          cd scripts
+          ./run-pulumi.sh $DIGITALOCEAN_TOKEN $DIGITALOCEAN_USERNAME $DOCKER_REGISTRY
