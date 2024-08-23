@@ -80,6 +80,6 @@ jobs:
           cd project_infra
           chmod +x ./scripts/*.sh
           cd scripts
-          doctl auth init --access-token "${{ secrets.DIGITALOCEAN_API_TOKEN }}" --context non-interactive
+          doctl auth init --access-token "${{ secrets.DIGITALOCEAN_TOKEN  }}" --context non-interactive
           doctl auth list --context non-interactive          doctl auth list
           docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
