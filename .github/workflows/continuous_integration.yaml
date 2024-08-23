@@ -1,9 +1,15 @@
 name: Continuous Integration
 
-on: pull_request
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
 
 jobs:
   continuous-integration:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -19,7 +25,7 @@ jobs:
           npm install
           npm run build
 
-      - name: Install setup and authenticate with pulumi
+      - name: Install setup and authenticate with Pulumi
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
         run: |
@@ -27,6 +33,7 @@ jobs:
           chmod +x ./scripts/*.sh
           cd scripts
           ./setup.sh
+
       - name: Authenticate with DigitalOcean
         env:
           DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
@@ -34,4 +41,20 @@ jobs:
           cd project_infra
           chmod +x ./scripts/*.sh
           cd scripts
+          ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
+
+  post-merge-actions:
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Additional task after merge to main
+        run: |
+          echo "Performing post-merge actions on main branch"
+          cd project_infra
+          chmod +x ./scripts/*.sh
+          cd scripts
+          ./setup.sh
           ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
