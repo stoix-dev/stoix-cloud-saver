@@ -33,6 +33,7 @@ export default function IndexPage() {
       });
   }
 
+  
   return (
     isLoading ? (
       <div>
