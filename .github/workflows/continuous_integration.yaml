@@ -67,3 +67,6 @@ jobs:
         run: |
           docker tag stoix-cloud-saver-web-next-app:latest registry.digitalocean.com/${{secrets.DOCKER_REGISTRY}}/stoix-cloud-saver-web-next-app
           docker images
+      -name: Push Docker Image to DigitalOcean Container Registry
+        run: |
+          docker push registry.digitalocean.com/${{secrets.DOCKER_REGISTRY}}/stoix-cloud-saver-web-next-app
