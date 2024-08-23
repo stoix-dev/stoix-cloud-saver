@@ -80,7 +80,6 @@ jobs:
           cd project_infra
           chmod +x ./scripts/*.sh
           cd scripts
-          ./setup.sh
           ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN $DIGITALOCEAN_USERNAME DOCKER_REGISTRY
           docker push registry.digitalocean.com/${DOCKER_REGISTRY}/stoix-cloud-saver-web-next-app
       - name: Deploy to DigitalOcean Kubernetes
