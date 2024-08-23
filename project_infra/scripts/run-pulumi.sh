@@ -6,5 +6,5 @@ export PATH=$PATH:$HOME/.pulumi/bin
 cd ../
 npm install
 pulumi login
-pulumi stack select dev
+pulumi stack select production
 pulumi up -y
