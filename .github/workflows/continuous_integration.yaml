@@ -62,7 +62,6 @@ jobs:
           ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
       - name: Build Docker Image
         run: |
-          cd project_infra
-          chmod +x ./scripts/*.sh
-          cd scripts
-          ./deploy.sh $DIGITALOCEAN_TOKEN
+          docker-compose build web-next-app
+          docker images
+      
