@@ -73,7 +73,7 @@ jobs:
 
       - name: Push Docker Image to DigitalOcean Container Registry
         env:
-          DOCKER_REGISTRY: ${{ ecrets.DIGITALOCEAN_TOKEN  }}
+          DOCKER_REGISTRY: ${{ secrets.DOCKER_REGISTRY }}
         run: |
           cd project_infra
           chmod +x ./scripts/*.sh
