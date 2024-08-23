@@ -53,6 +53,7 @@ jobs:
       - name: Additional task after merge to main
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+          DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
         run: |
           echo "Performing post-merge actions on main branch"
           cd project_infra
