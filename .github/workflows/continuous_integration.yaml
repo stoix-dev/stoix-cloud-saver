@@ -49,6 +49,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+
       - name: Authenticate with Pulumi and DigitalOcean
         env:
           PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
@@ -60,13 +61,16 @@ jobs:
           cd scripts
           ./setup.sh
           ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN
+
       - name: Build Docker Image
         run: |
           docker-compose build web-next-app
+
       - name: Tag Docker Image to DigitalOcean Container Registry
         run: |
-          docker tag stoix-cloud-saver-web-next-app:latest registry.digitalocean.com/${{secrets.DOCKER_REGISTRY}}/stoix-cloud-saver-web-next-app
+          docker tag stoix-cloud-saver-web-next-app:latest registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
           docker images
-      -name: Push Docker Image to DigitalOcean Container Registry
+
+      - name: Push Docker Image to DigitalOcean Container Registry
         run: |
-          docker push registry.digitalocean.com/${{secrets.DOCKER_REGISTRY}}/stoix-cloud-saver-web-next-app
+          docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
