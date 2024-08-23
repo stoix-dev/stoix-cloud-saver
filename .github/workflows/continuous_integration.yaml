@@ -80,6 +80,8 @@ jobs:
           cd project_infra
           chmod +x ./scripts/*.sh
           cd scripts
+          ./setup.sh
+          ./digital-ocean-auth.sh $DIGITALOCEAN_TOKEN $DIGITALOCEAN_USERNAME
           doctl auth list
           docker push registry.digitalocean.com/${{ secrets.DOCKER_REGISTRY }}/stoix-cloud-saver-web-next-app
 
@@ -92,4 +94,5 @@ jobs:
           cd project_infra
           chmod +x ./scripts/*.sh
           cd scripts
+          ./setup.sh
           ./run-pulumi.sh $DIGITALOCEAN_TOKEN $DIGITALOCEAN_USERNAME $DOCKER_REGISTRY
