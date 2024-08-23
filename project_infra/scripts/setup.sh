@@ -13,7 +13,7 @@ pulumi login
 
 # Update the system's packages
 sudo apt-get update -y
-sudo apt-get install sudo ca-certificates curl gnupg -y
+sudo apt-get install sudo ca-certificates curl gnupg lsb-release -y
 
 # Node.js
 sudo mkdir -p /etc/apt/keyrings
@@ -29,3 +29,19 @@ sudo mv doctl /usr/local/bin
 # Install nodejs
 sudo apt-get update -y
 sudo apt-get install -y nodejs
+
+# Docker
+sudo apt-get install -y apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+sudo apt-get update -y
+sudo apt-get install -y docker-ce
+
+# Docker Compose
+DOCKER_COMPOSE_VERSION=2.20.2
+sudo curl -L "https://github.com/docker/compose/releases/download/v${DOCKER_COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+sudo chmod +x /usr/local/bin/docker-compose
+
+# Verify Docker and Docker Compose installation
+docker --version
+docker-compose --version
