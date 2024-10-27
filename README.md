@@ -90,4 +90,8 @@ doctl kubernetes options versions
  kubectl create secret generic digitalocean-dns   --from-literal=access-token="yourtoken"  --namespace default
  ```
 
-## Step 12: After creating the cluster secret responsible to verify the DNS you can go to the service-infra repo and run pulumi up
+## Step 12: After creating the cluster secret responsible to verify the DNS you can go to the service-infra repo and run:
+
+```bash
+pulumi up
+```
