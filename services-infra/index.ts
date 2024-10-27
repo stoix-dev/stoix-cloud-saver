@@ -174,7 +174,7 @@ const ingress = new k8s.networking.v1.Ingress("ingress", {
     spec: {
         rules: [
     {
-                host: "atendimento.fabricaleads.com.br",
+                host: domainName,
                 http: {
                     paths: [
                         {
