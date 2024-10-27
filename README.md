@@ -21,12 +21,13 @@ Follow the official Pulumi installation guide to install Pulumi on your system. 
 
 ```bash
 pulumi version
-mkdir my-pulumi-project
-cd my-pulumi-project
+
 ```
-## Step 2: Set Up a New Pulumi Project
+## Step 2: Set Up a New Pulumi Project in case you need
 
 ```bash
+mkdir my-pulumi-project
+cd my-pulumi-project
 pulumi new typescript
 ```
 ## Step 3: Install doctl
