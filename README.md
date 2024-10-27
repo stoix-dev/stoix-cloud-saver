@@ -51,7 +51,11 @@ doctl version
 ```bash
 doctl auth init
 ```
+## STEP 6.1: Authenticate with docker and digital ocean registry
 
+```bash
+ docker login -u "youruser" -p "yourtoken"  registry.digitalocean.com
+```
 ## STEP 7: Tag the image of your application:
 ```bash
 docker tag YOUR_IMAGE registry.digitalocean.com/YOUR_REGISTRY/YOUR_IMAGE
@@ -63,10 +67,27 @@ docker tag YOUR_IMAGE registry.digitalocean.com/YOUR_REGISTRY/YOUR_IMAGE
 docker push registry.digitalocean.com/YOUR_REGISTRY/YOUR_IMAGE
 ```
 
+## STEP 09: Go to the project infra repository  and run the following commands to first create the cluster, make sure to have export the env for the digitlocean token e Kubeconfig path:
 
-## STEP 9: Go to the project infra repository and run:
-
+## To make sure we are using the right cluster versions run:
 ```bash
-pulumi up
+doctl kubernetes options versions
 ```
 
+```bash
+ pulumi up
+ doctl kubernetes cluster kubeconfig save the clusteName
+```
+## STEP 10:  Run the following command to see if the current cluster is the same you created:
+
+```bash
+    kubectl config current-context
+```
+
+## STEP 11: run the following command to add this a secret to the cluster:
+
+```bash
+ kubectl create secret generic digitalocean-dns   --from-literal=access-token="yourtoken"  --namespace default
+ ```
+
+## Step 12: After creating the cluster secret responsible to verify the DNS you can go to the service-infra repo and run pulumi up
