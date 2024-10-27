@@ -30,7 +30,8 @@ mkdir my-pulumi-project
 cd my-pulumi-project
 pulumi new typescript
 ```
-## Step 3: Install doctl
+## Step 3: Install doctl https://docs.digitalocean.com/reference/doctl/how-to/install/
+
 
 ```bash
 doctl version
