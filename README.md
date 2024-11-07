@@ -63,13 +63,13 @@ doctl auth init
 docker tag YOUR_IMAGE registry.digitalocean.com/YOUR_REGISTRY/YOUR_IMAGE
 ```
 
-## STEP 8: Push your image to the Digital Ocean Doker Registry
+## STEP 8: Push your image to the Digital Ocean Docker Registry
 
 ```bash
 docker push registry.digitalocean.com/YOUR_REGISTRY/YOUR_IMAGE
 ```
 
-## STEP 09: Go to the project infra repository  and run the following commands to first create the cluster, make sure to have export the env for the digitlocean token e Kubeconfig path:
+## STEP 09: Go to the project infra repository  and run the following commands to first create the cluster, make sure to have export the env for the digitalocean token Kubeconfig path:
 
 ## To make sure we are using the right cluster versions run:
 ```bash
