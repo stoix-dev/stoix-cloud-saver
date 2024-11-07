@@ -97,3 +97,5 @@ doctl kubernetes options versions
 ```bash
 pulumi up
 ```
+
+Made with ❤️ by [Stoix](https://stoix.cloud/)
