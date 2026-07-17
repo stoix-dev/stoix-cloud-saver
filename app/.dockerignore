@@ -1,0 +1,10 @@
+node_modules
+dist
+test
+*.md
+.git
+.gitignore
+npm-debug.log
+Dockerfile
+.dockerignore
+vitest.config.ts
