@@ -1,22 +1,32 @@
 # Multi-stage build for the stoix-cloud-saver app.
 # The same image is deployed identically to AWS, DigitalOcean and OCI; cloud
 # identity is injected at runtime via environment variables, never baked in.
-# Build context is the app/ directory.
+#
+# Reproducibility is a first-class requirement here: the base image is pinned by
+# digest and dependencies are installed with `npm ci` from the committed
+# lockfile, so the exact same bytes build everywhere.
+#
+# Build context is the repository ROOT (the npm workspaces lockfile lives there):
+#   docker build -f app/Dockerfile -t stoix-cloud-saver .
 
-# Builder stage: install all deps and compile TypeScript to dist/.
-FROM node:20-alpine AS builder
-WORKDIR /app
+# Builder stage: install all deps and compile TypeScript to app/dist.
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS builder
+WORKDIR /repo
 
-COPY package.json ./
-RUN npm install --no-audit --no-fund
+# Deterministic install from the committed root lockfile. Copy only the manifests
+# first so this layer caches until a dependency actually changes.
+COPY package.json package-lock.json ./
+COPY app/package.json ./app/package.json
+RUN npm ci
 
-COPY tsconfig.json ./
-COPY src ./src
-RUN npm run build
+# Compile the app workspace.
+COPY app/tsconfig.json ./app/tsconfig.json
+COPY app/src ./app/src
+RUN npm run build --workspace app
 
 # Runtime stage: production deps + compiled output only, run as non-root.
-FROM node:20-alpine AS runtime
-WORKDIR /app
+FROM node:20-alpine@sha256:fb4cd12c85ee03686f6af5362a0b0d56d50c58a04632e6c0fb8363f609372293 AS runtime
+WORKDIR /repo
 ENV NODE_ENV=production
 ENV PORT=8080
 
@@ -26,13 +36,16 @@ ARG GIT_COMMIT=unknown
 ENV APP_VERSION=${APP_VERSION}
 ENV GIT_COMMIT=${GIT_COMMIT}
 
-COPY package.json ./
-RUN npm install --omit=dev --no-audit --no-fund \
+# Deterministic production-only install (drops typescript/tsx/vitest).
+COPY package.json package-lock.json ./
+COPY app/package.json ./app/package.json
+RUN npm ci --omit=dev \
   && npm cache clean --force
 
-COPY --from=builder /app/dist ./dist
+COPY --from=builder /repo/app/dist ./app/dist
 
 USER node
+WORKDIR /repo/app
 EXPOSE 8080
 
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
