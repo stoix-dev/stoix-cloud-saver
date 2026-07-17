@@ -15,6 +15,9 @@ config:
   stoix-cloud-saver-oci:nodeOcpus: "2"
   stoix-cloud-saver-oci:nodeMemoryGbs: "12"
   stoix-cloud-saver-oci:nodeCount: "1"
+  # Which availability domain to place the A1 nodes in (0-based). Bump to 1 or 2
+  # and re-deploy if the first AD reports "out of host capacity" for A1 shapes.
+  stoix-cloud-saver-oci:availabilityDomainIndex: "0"
   # Region-specific OKE worker image OCID must be supplied at deploy time.
   stoix-cloud-saver-oci:nodeImageId: ocid1.image.oc1..REPLACE
   stoix-cloud-saver-oci:domain: oci.demo.example.com

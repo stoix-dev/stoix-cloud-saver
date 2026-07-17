@@ -25,6 +25,9 @@ const nodeOcpus = config.requireNumber("nodeOcpus");
 const nodeMemoryGbs = config.requireNumber("nodeMemoryGbs");
 const nodeCount = config.requireNumber("nodeCount");
 const nodeImageId = config.require("nodeImageId");
+// ARM A1 free capacity is often exhausted in the first AD; make the index
+// selectable so a live deploy can retry another AD without a code change.
+const availabilityDomainIndex = config.getNumber("availabilityDomainIndex") ?? 0;
 const domain = config.require("domain");
 const acmeEmail = config.require("acmeEmail");
 const image = config.require("image");
@@ -39,7 +42,15 @@ const kubernetesVersion = config.get("kubernetesVersion") ?? "v1.30.1";
 // kept deliberately small here for the showcase.
 const availabilityDomain = oci.identity
   .getAvailabilityDomainsOutput({ compartmentId })
-  .availabilityDomains.apply((ads) => ads[0].name);
+  .availabilityDomains.apply((ads) => {
+    const ad = ads[availabilityDomainIndex];
+    if (ad === undefined) {
+      throw new Error(
+        `availabilityDomainIndex ${availabilityDomainIndex} is out of range; compartment has ${ads.length} availability domain(s).`,
+      );
+    }
+    return ad.name;
+  });
 
 const vcn = new oci.core.Vcn("stoix-oke-vcn", {
   compartmentId,
