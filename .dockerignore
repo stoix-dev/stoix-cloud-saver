@@ -1,0 +1,16 @@
+# Build context is the repo root; keep it small and deterministic.
+node_modules
+**/node_modules
+app/dist
+app/test
+**/*.md
+.git
+.gitignore
+.nvmrc
+npm-debug.log
+app/Dockerfile
+.dockerignore
+app/vitest.config.ts
+infra
+.wrangler
+Pulumi.*.local.yaml

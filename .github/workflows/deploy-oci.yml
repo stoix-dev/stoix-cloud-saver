@@ -1,0 +1,98 @@
+name: Deploy OCI (on merge to main)
+
+# Runs on push to main only. This is the ONE automatic `pulumi up` in the whole
+# repo, and it targets the OCI stack exclusively. OCI runs on the Always Free
+# tier (Ampere A1 within the tenancy allowance), so this live environment costs
+# nothing. AWS and DigitalOcean are deliberately preview-only (see ci.yml) and
+# are never deployed automatically.
+#
+# The job is gated on secrets: with no registry or Pulumi credentials configured
+# it logs a clear no-op instead of failing red.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-oci:
+    name: Build + push image, pulumi up (OCI Always Free ONLY)
+    runs-on: ubuntu-latest
+    # Belt and suspenders: the trigger already scopes to main, and this keeps
+    # the job from running if the workflow is ever reused elsewhere.
+    if: github.ref == 'refs/heads/main'
+    env:
+      # Registry is parameterized so this works with OCIR, GHCR or any registry.
+      # e.g. REGISTRY=iad.ocir.io, IMAGE_NAME=<tenancy-namespace>/stoix/cloud-saver
+      REGISTRY: ${{ secrets.REGISTRY }}
+      REGISTRY_USERNAME: ${{ secrets.REGISTRY_USERNAME }}
+      REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+      IMAGE_NAME: ${{ secrets.IMAGE_NAME }}
+      # Pulumi + OCI credentials for the `up`.
+      PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+      OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+      OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+      OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+      OCI_REGION: ${{ secrets.OCI_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Decide once whether we have enough secrets to actually deploy. Every
+      # heavy step below keys off this output, so a repo without secrets ends
+      # green with an explicit "skipped" note.
+      - name: Gate status
+        id: gate
+        run: |
+          if [ -n "$REGISTRY" ] && [ -n "$PULUMI_ACCESS_TOKEN" ]; then
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+            echo "Secrets present: will build, push and run pulumi up on OCI."
+          else
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+            echo "REGISTRY and/or PULUMI_ACCESS_TOKEN missing: skipping deploy (no-op)."
+          fi
+
+      - name: Setup Node 20
+        if: steps.gate.outputs.ready == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install workspaces (npm ci)
+        if: steps.gate.outputs.ready == 'true'
+        run: npm ci
+
+      - name: Registry login
+        if: steps.gate.outputs.ready == 'true'
+        run: echo "$REGISTRY_TOKEN" | docker login "$REGISTRY" -u "$REGISTRY_USERNAME" --password-stdin
+
+      # Build from the repo ROOT context (Dockerfile expects the root lockfile),
+      # tag with the commit SHA and latest, then push both.
+      - name: Build and push app image (:sha and :latest)
+        if: steps.gate.outputs.ready == 'true'
+        run: |
+          IMAGE_REF="$REGISTRY/${IMAGE_NAME:-stoix/cloud-saver}"
+          docker build \
+            -f app/Dockerfile \
+            -t "$IMAGE_REF:${{ github.sha }}" \
+            -t "$IMAGE_REF:latest" \
+            --build-arg GIT_COMMIT=${{ github.sha }} \
+            .
+          docker push "$IMAGE_REF:${{ github.sha }}"
+          docker push "$IMAGE_REF:latest"
+
+      # The sole automatic `up` in this repo. OCI only, Always Free sizing,
+      # zero cost. Non-interactive with --yes.
+      - name: Pulumi up (OCI stack only)
+        if: steps.gate.outputs.ready == 'true'
+        uses: pulumi/actions@v6
+        with:
+          command: up
+          stack-name: dev
+          work-dir: infra/oci
+          # equivalent to `pulumi up --yes`
+          upsert: false
