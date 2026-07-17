@@ -1,0 +1,119 @@
+name: CI
+
+# Runs on every pull request. Two jobs:
+#   1. build-test: lint + test all workspaces, then build the app image.
+#   2. preview:    pulumi preview for aws / digitalocean / oci in parallel.
+#
+# IMPORTANT: pulumi preview is READ-ONLY. It computes a plan/diff against the
+# target cloud and creates, changes or deletes NOTHING, so it has zero cost.
+# The preview job is gated on secrets being present, so a fresh repo (no cloud
+# credentials configured yet) shows a clean, skipped preview instead of a hard
+# red failure. Real cloud plans start appearing once the secrets are set.
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  build-test:
+    name: Lint, test, build image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      # Deterministic install of every workspace (app + infra/*) from the
+      # committed root lockfile.
+      - name: Install workspaces (npm ci)
+        run: npm ci
+
+      # Lint everywhere: each package's "lint" script is `tsc --noEmit`.
+      - name: Lint (tsc --noEmit across workspaces)
+        run: npm run lint --workspaces --if-present
+
+      # Tests: app (vitest) and infra/shared (vitest). Others have no test
+      # script and are skipped by --if-present.
+      - name: Test (across workspaces)
+        run: npm test --workspaces --if-present
+
+      # Build the app image. Context is the repo ROOT because the Dockerfile
+      # COPYs the root package.json + package-lock.json + app/package.json and
+      # runs `npm ci` from there. Not pushed here; this only proves it builds.
+      - name: Build app Docker image (context = repo root)
+        run: |
+          docker build \
+            -f app/Dockerfile \
+            -t stoix-cloud-saver:ci \
+            --build-arg GIT_COMMIT=${{ github.sha }} \
+            .
+
+  preview:
+    name: Pulumi preview (read-only, zero cost)
+    runs-on: ubuntu-latest
+    needs: build-test
+    strategy:
+      fail-fast: false
+      matrix:
+        cloud: [aws, digitalocean, oci]
+    # Secrets are surfaced as env so the steps below can gate on their presence.
+    # GitHub does not allow the `secrets` context in a job-level `if:`, so we
+    # promote them to env and guard each real step with `if: env.* != ''`.
+    # Fill these in the repo settings (Settings > Secrets and variables > Actions)
+    # to activate previews. Names for the OCI provider follow the pulumi-oci
+    # convention; adjust if your tenancy uses a config file instead.
+    env:
+      PULUMI_ACCESS_TOKEN: ${{ secrets.PULUMI_ACCESS_TOKEN }}
+      # DigitalOcean
+      DIGITALOCEAN_TOKEN: ${{ secrets.DIGITALOCEAN_TOKEN }}
+      # AWS
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      # OCI (pulumi-oci reads these from the environment)
+      OCI_TENANCY_OCID: ${{ secrets.OCI_TENANCY_OCID }}
+      OCI_USER_OCID: ${{ secrets.OCI_USER_OCID }}
+      OCI_FINGERPRINT: ${{ secrets.OCI_FINGERPRINT }}
+      OCI_PRIVATE_KEY: ${{ secrets.OCI_PRIVATE_KEY }}
+      OCI_REGION: ${{ secrets.OCI_REGION }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Always runs, so the job is green even with no secrets. Makes the skip
+      # explicit in the logs.
+      - name: Gate status
+        run: |
+          if [ -z "$PULUMI_ACCESS_TOKEN" ]; then
+            echo "PULUMI_ACCESS_TOKEN is not set."
+            echo "Skipping ${{ matrix.cloud }} preview until cloud secrets are configured."
+          else
+            echo "Secrets present: running read-only preview for ${{ matrix.cloud }}."
+          fi
+
+      - name: Setup Node 20
+        if: env.PULUMI_ACCESS_TOKEN != ''
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install workspaces (npm ci)
+        if: env.PULUMI_ACCESS_TOKEN != ''
+        run: npm ci
+
+      # Read-only plan against the real folder infra/<cloud> (aws,
+      # digitalocean, oci) on the `dev` stack. Creates nothing.
+      - name: Pulumi preview (${{ matrix.cloud }})
+        if: env.PULUMI_ACCESS_TOKEN != ''
+        uses: pulumi/actions@v6
+        with:
+          command: preview
+          stack-name: dev
+          work-dir: infra/${{ matrix.cloud }}
