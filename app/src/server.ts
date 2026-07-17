@@ -216,7 +216,11 @@ function formatUptime(totalSeconds: number): string {
 export function buildServer(
   envSource: Record<string, string | undefined> = process.env,
 ): FastifyInstance {
-  const app = Fastify({ logger: false });
+  const app = Fastify({
+    logger: {
+      level: process.env.LOG_LEVEL ?? "info",
+    },
+  });
 
   app.get("/healthz", async () => {
     return { status: "ok", uptime: process.uptime() };
