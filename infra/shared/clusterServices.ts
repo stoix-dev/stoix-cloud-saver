@@ -35,9 +35,24 @@ export class ClusterServices extends pulumi.ComponentResource {
       provider: args.kubeProvider,
     };
 
+    // helm.v3.Chart does NOT create the target namespace and the upstream charts
+    // do not template their own, so create them explicitly first. Each chart
+    // then dependsOn its namespace to guarantee apply ordering.
+    const ingressNginxNamespace = new k8s.core.v1.Namespace(
+      `${name}-ingress-nginx-ns`,
+      { metadata: { name: INGRESS_NGINX_NAMESPACE } },
+      childOpts,
+    );
+
+    const certManagerNamespace = new k8s.core.v1.Namespace(
+      `${name}-cert-manager-ns`,
+      { metadata: { name: CERT_MANAGER_NAMESPACE } },
+      childOpts,
+    );
+
     // ingress-nginx: fronts the cluster with a cloud LoadBalancer so the app
     // Ingress (class "nginx") gets a public entrypoint on every provider.
-    const ingressNginx = new k8s.helm.v3.Chart(
+    new k8s.helm.v3.Chart(
       `${name}-ingress-nginx`,
       {
         chart: "ingress-nginx",
@@ -50,7 +65,7 @@ export class ClusterServices extends pulumi.ComponentResource {
           },
         },
       },
-      childOpts,
+      { ...childOpts, dependsOn: ingressNginxNamespace },
     );
 
     // cert-manager: issues and renews the TLS certificate the Ingress requests.
@@ -65,7 +80,7 @@ export class ClusterServices extends pulumi.ComponentResource {
           installCRDs: true,
         },
       },
-      childOpts,
+      { ...childOpts, dependsOn: certManagerNamespace },
     );
 
     // letsencrypt ClusterIssuer: ACME production endpoint, http01 solved via
@@ -95,9 +110,5 @@ export class ClusterServices extends pulumi.ComponentResource {
     );
 
     this.registerOutputs({});
-
-    // Reference ingressNginx so the LoadBalancer install is part of this
-    // component's resource graph even though it exposes no direct output.
-    void ingressNginx;
   }
 }
