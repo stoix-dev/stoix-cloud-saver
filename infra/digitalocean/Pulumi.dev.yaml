@@ -1,0 +1,11 @@
+# Non-secret config only. The DigitalOcean token comes from the environment at
+# runtime (DIGITALOCEAN_TOKEN), never committed here.
+config:
+  stoix-cloud-saver-do:region: sfo3
+  stoix-cloud-saver-do:nodeSize: s-2vcpu-2gb
+  stoix-cloud-saver-do:nodeCount: "1"
+  stoix-cloud-saver-do:domain: do.demo.example.com
+  stoix-cloud-saver-do:acmeEmail: devops@stoix.dev
+  # Replace with the real published image before deploy.
+  stoix-cloud-saver-do:image: registry.digitalocean.com/stoix/cloud-saver:dev
+  stoix-cloud-saver-do:appVersion: dev
