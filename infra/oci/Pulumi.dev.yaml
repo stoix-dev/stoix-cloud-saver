@@ -1,0 +1,24 @@
+# Non-secret config only. OCI credentials come from the environment / OCI config
+# file at runtime (OCI_* env vars or ~/.oci/config), never committed here.
+#
+# Always Free sizing constraint: the A1 (Ampere Arm) pool must stay within the
+# tenancy Always Free allowance of 4 OCPU and 24 GB total across ALL A1 nodes.
+# Below: 1 node x 2 OCPU x 12 GB = 2 OCPU / 12 GB total, comfortably inside it.
+config:
+  oci:region: us-ashburn-1
+  stoix-cloud-saver-oci:region: us-ashburn-1
+  # Placeholder compartment OCID. Replace with the real target compartment.
+  stoix-cloud-saver-oci:compartmentId: ocid1.compartment.oc1..REPLACE
+  # Set to a currently supported OKE version at deploy time (oci ce cluster-options get).
+  stoix-cloud-saver-oci:kubernetesVersion: v1.30.1
+  stoix-cloud-saver-oci:nodeShape: VM.Standard.A1.Flex
+  stoix-cloud-saver-oci:nodeOcpus: "2"
+  stoix-cloud-saver-oci:nodeMemoryGbs: "12"
+  stoix-cloud-saver-oci:nodeCount: "1"
+  # Region-specific OKE worker image OCID must be supplied at deploy time.
+  stoix-cloud-saver-oci:nodeImageId: ocid1.image.oc1..REPLACE
+  stoix-cloud-saver-oci:domain: oci.demo.example.com
+  stoix-cloud-saver-oci:acmeEmail: devops@stoix.dev
+  # Replace with the real published image before deploy.
+  stoix-cloud-saver-oci:image: iad.ocir.io/stoix/cloud-saver:dev
+  stoix-cloud-saver-oci:appVersion: dev
